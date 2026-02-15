@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlateSavor | Resturant Finder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        :root {
+            /* Catppuccin Mocha Theme Colors */
+            --primary-10: #11111b; /* crust */
+            --primary-20: #181825; /* mantle */
+            --primary-30: #1e1e2e; /* base */
+            --primary-40: #313244; /* surface0 */
+            --primary-80: #cba6f7; /* mauve */
+            --primary-90: #f5e0dc; /* rosewater */
+            --primary-95: #a6adc8; /* overlay0 */
+
+            --secondary-10: #11111b; /* crust */
+            --secondary-20: #181825; /* mantle */
+            --secondary-30: #1e1e2e; /* base */
+            --secondary-40: #313244; /* surface0 */
+            --secondary-80: #a6adc8; /* overlay0 */
+            --secondary-90: #bac2de; /* text */
+            --secondary-95: #cdd6f4; /* text */
+
+            --tertiary-10: #11111b; /* crust */
+            --tertiary-20: #181825; /* mantle */
+            --tertiary-30: #1e1e2e; /* base */
+            --tertiary-40: #313244; /* surface0 */
+            --tertiary-80: #f9e2af; /* yellow */
+            --tertiary-90: #f5e0dc; /* rosewater */
+            --tertiary-95: #f5e0dc; /* rosewater */
+
+            --neutral-10: #11111b; /* crust */
+            --neutral-20: #181825; /* mantle */
+            --neutral-90: #a6adc8; /* overlay0 */
+            --neutral-95: #bac2de; /* subtext1 */
+            --neutral-99: #cdd6f4; /* text */
+
+            --error-10: #11111b; /* crust */
+            --error-20: #e78284; /* red */
+            --error-90: #e78284; /* red */
+
+            --shadow-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+            --shadow-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.15), 0px 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.15), 0px 1px 3px rgba(0, 0, 0, 0.3);
+            
+            /* Additional Catppuccin colors for specific elements */
+            --ctp-rosewater: #f5e0dc;
+            --ctp-flamingo: #f2cdcd;
+            --ctp-pink: #f5c2e7;
+            --ctp-mauve: #cba6f7;
+            --ctp-red: #e78284;
+            --ctp-maroon: #ea999c;
+            --ctp-peach: #f8bd96;
+            --ctp-yellow: #f9e2af;
+            --ctp-green: #a6e3a1;
+            --ctp-teal: #94e2d5;
+            --ctp-sky: #89dceb;
+            --ctp-sapphire: #74c7ec;
+            --ctp-blue: #89b4fa;
+            --ctp-lavender: #b4befe;
+            --ctp-text: #cdd6f4;
+            --ctp-subtext1: #bac2de;
+            --ctp-subtext0: #a6adc8;
+            --ctp-overlay2: #9399b2;
+            --ctp-overlay1: #7f849c;
+            --ctp-overlay0: #6c7086;
+            --ctp-surface2: #585b70;
+            --ctp-surface1: #45475a;
+            --ctp-surface0: #313244;
+            --ctp-base: #1e1e2e;
+            --ctp-mantle: #181825;
+            --ctp-crust: #11111b;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--ctp-base);
+            color: var(--ctp-text);
+            line-height: 1.6;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        
+        /* Top App Bar */
+        .top-app-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 16px;
+            background-color: var(--ctp-mantle);
+            box-shadow: var(--shadow-1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .app-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .icon-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ctp-blue);
+        }
+
+        .icon-button:hover {
+            background-color: var(--ctp-surface0);
+        }
+        
+        .material-symbols-rounded {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Main Content Area */
+        .main-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        /* Map Container */
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 350px;
+            background-color: var(--ctp-base);
+            box-shadow: var(--shadow-1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        /* Search Section */
+        .search-section {
+            padding: 16px;
+            background-color: var(--ctp-mantle);
+            border-bottom: 1px solid var(--ctp-surface1);
+        }
+
+        .search-field {
+            width: 100%;
+            padding: 16px 24px;
+            padding-left: 56px;
+            border-radius: 24px;
+            border: none;
+            background-color: var(--ctp-surface0);
+            box-shadow: var(--shadow-1);
+            font-size: 16px;
+            color: var(--ctp-text);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--ctp-blue);
+        }
+        
+        /* Category Chips */
+        .category-chips {
+            display: flex;
+            gap: 12px;
+            padding: 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .category-chips::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .chip {
+            padding: 12px 24px;
+            border-radius: 50px;
+            background-color: var(--ctp-surface0);
+            border: 1px solid var(--ctp-surface1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .chip.active {
+            background-color: var(--ctp-surface1);
+            border-color: var(--ctp-mauve);
+            color: var(--ctp-text);
+        }
+
+        .chip:hover {
+            background-color: var(--ctp-surface1);
+        }
+        
+        /* Results List */
+        .results-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        
+        .result-item {
+            padding: 16px;
+            border-radius: 16px;
+            border: 1px solid var(--ctp-surface1);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.5s ease; /* Slower transition */
+        }
+
+        .result-item:hover {
+            background-color: var(--ctp-surface0);
+            border-color: var(--ctp-blue);
+        }
+
+        .result-item.active {
+            background-color: var(--ctp-surface1);
+            border-color: var(--ctp-mauve);
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--ctp-text);
+        }
+
+        .result-subtitle {
+            font-size: 14px;
+            color: var(--ctp-subtext1);
+            margin-bottom: 8px;
+        }
+
+        .result-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .result-rating {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .filled-star {
+            color: var(--ctp-yellow);
+        }
+        
+        .empty-star {
+            color: var(--ctp-surface2);
+        }
+        
+        .result-distance {
+            color: var(--ctp-subtext0);
+        }
+
+        .favorite-toggle {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--ctp-surface2);
+            padding: 4px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .favorite-toggle.favorited {
+            color: var(--ctp-red);
+        }
+
+        .favorite-toggle:hover {
+            background-color: var(--ctp-surface0);
+        }
+
+        .directions-btn {
+            margin-top: 8px;
+            padding: 6px 12px;
+            border-radius: 8px;
+            background-color: var(--ctp-blue);
+            color: var(--ctp-base);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .directions-btn:hover {
+            background-color: var(--ctp-sapphire);
+        }
+
+        /* Route line style */
+        .route-line {
+            stroke: var(--ctp-blue);
+            stroke-width: 4;
+            stroke-opacity: 0.7;
+            fill: none;
+        }
+
+        /* FAB */
+        .fab {
+            position: absolute;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 16px;
+            background-color: var(--ctp-blue);
+            border: none;
+            color: var(--ctp-base);
+            box-shadow: var(--shadow-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 900;
+        }
+
+        .fab:hover {
+            background-color: var(--ctp-sapphire);
+            box-shadow: var(--shadow-3);
+        }
+        
+        /* Loading indicator */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--ctp-subtext1);
+        }
+
+        /* Permission prompt */
+        .permission-prompt {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--ctp-surface0);
+            border-radius: 16px;
+            margin: 16px;
+        }
+
+        .permission-btn {
+            padding: 12px 24px;
+            border-radius: 24px;
+            background-color: var(--ctp-blue);
+            color: var(--ctp-base);
+            border: none;
+            cursor: pointer;
+            margin-top: 16px;
+            font-weight: 500;
+        }
+
+        .permission-btn:hover {
+            background-color: var(--ctp-sapphire);
+        }
+        
+        /* Mobile and tablet responsive adjustments */
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                height: 40vh;
+                min-height: 300px;
+            }
+
+            .map-container {
+                height: 60vh;
+                min-height: 300px;
+            }
+            
+            .top-app-bar {
+                padding: 12px 16px;
+            }
+            
+            .app-title {
+                font-size: 20px;
+            }
+            
+            .search-section {
+                padding: 12px;
+            }
+            
+            .search-field {
+                padding: 14px 20px;
+                padding-left: 50px;
+                font-size: 16px;
+            }
+            
+            .category-chips {
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .chip {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .results-list {
+                padding: 12px;
+            }
+            
+            .result-item {
+                padding: 12px;
+                margin-bottom: 8px;
+            }
+            
+            .fab {
+                width: 50px;
+                height: 50px;
+                bottom: 16px;
+                right: 16px;
+            }
+        }
+        
+        /* Extra small devices (phones, 600px and down) */
+        @media (max-width: 600px) {
+            .top-app-bar {
+                padding: 10px;
+            }
+            
+            .app-title {
+                font-size: 18px;
+            }
+            
+            .search-field {
+                padding: 12px 16px;
+                padding-left: 46px;
+                font-size: 15px;
+            }
+            
+            .category-chips {
+                padding: 10px;
+                gap: 6px;
+            }
+            
+            .chip {
+                padding: 8px 14px;
+                font-size: 12px;
+                white-space: nowrap;
+            }
+            
+            .result-title {
+                font-size: 15px;
+            }
+            
+            .result-subtitle {
+                font-size: 13px;
+            }
+            
+            .result-details {
+                font-size: 13px;
+            }
+            
+            .fab {
+                width: 48px;
+                height: 48px;
+                bottom: 12px;
+                right: 12px;
+            }
+            
+            .sidebar {
+                height: 45vh;
+            }
+            
+            .map-container {
+                height: 55vh;
+            }
+        }
+        
+        /* Very small devices (older phones) */
+        @media (max-width: 400px) {
+            .app-title {
+                font-size: 16px;
+            }
+            
+            .search-field {
+                padding: 10px 14px;
+                padding-left: 42px;
+                font-size: 14px;
+            }
+            
+            .chip {
+                padding: 7px 12px;
+                font-size: 11px;
+            }
+            
+            .result-item {
+                padding: 10px;
+            }
+            
+            .result-title {
+                font-size: 14px;
+            }
+            
+            .result-subtitle {
+                font-size: 12px;
+            }
+            
+            .results-list {
+                padding: 8px;
+            }
+        }
+        
+        /* Additional mobile-specific styles */
+        body.mobile-device {
+            font-size: 16px; /* Slightly larger base font for better readability on mobile */
+        }
+        
+        body.mobile-device .category-chips {
+            -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        }
+        
+        body.mobile-device .result-item {
+            min-height: 60px; /* Ensure adequate touch target size */
+        }
+        
+        /* Touch-friendly adjustments */
+        @media (hover: none) and (pointer: coarse) {
+            /* Styles for touch devices */
+            .chip {
+                user-select: none; /* Prevent accidental text selection on touch */
+            }
+            
+            .result-item {
+                user-select: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Top App Bar -->
+    <header class="top-app-bar">
+        <div class="app-title">
+            PlateSavor
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        <!-- Map Container -->
+        <div class="map-container">
+            <div id="map"></div>
+            <button class="fab" id="locate-btn">
+                📍
+            </button>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Search Section -->
+            <div class="search-section">
+                <div style="position: relative;">
+                    <input type="text" class="search-field" id="search-input" placeholder="Search restaurants...">
+                </div>
+            </div>
+
+            <!-- Category Chips -->
+            <div class="category-chips">
+                <div class="chip active" data-category="all">
+                    All
+                </div>
+                <div class="chip" data-category="pizza">
+                    Pizza
+                </div>
+                <div class="chip" data-category="sushi">
+                    Sushi
+                </div>
+                <div class="chip" data-category="asian">
+                    Asian
+                </div>
+                <div class="chip" data-category="burger">
+                    Burgers
+                </div>
+                <div class="chip" data-category="mexican">
+                    Mexican
+                </div>
+                <div class="chip" data-category="healthy">
+                    Healthy
+                </div>
+            </div>
+
+            <!-- Results List -->
+            <div class="results-list" id="results-list">
+                <div class="permission-prompt">
+                    <h3>Find Restaurants Near You</h3>
+                    <p>We need your location to show nearby restaurants</p>
+                    <button class="permission-btn" id="request-location">Enable Location</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Initialize map
+        const map = L.map('map').setView([51.505, -0.09], 13);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Variables
+        let userMarker = null;
+        let userLocation = null;
+        let markers = [];
+        let markerMap = {}; // Map restaurant IDs to markers for quick lookup
+        let restaurants = [];
+        let currentCategory = 'all';
+        let isLocationEnabled = false;
+        let currentSelectedMarker = null; // Track currently selected marker
+        
+        // Custom marker icons
+        const blueIcon = L.icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        const redIcon = L.icon({
+            iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+        // Function to request user location
+        async function requestUserLocation() {
+            if (!navigator.geolocation) {
+                alert('Geolocation is not supported by your browser');
+                return;
+            }
+
+            try {
+                // Show loading state
+                document.getElementById('results-list').innerHTML = '<div class="loading">Getting your location...</div>';
+                
+                navigator.geolocation.getCurrentPosition(
+                    async function(position) {
+                        userLocation = [position.coords.latitude, position.coords.longitude];
+                        
+                        // Add user location marker
+                        if (userMarker) {
+                            map.removeLayer(userMarker);
+                        }
+                        userMarker = L.marker(userLocation, {
+                            icon: L.divIcon({
+                                className: 'user-location-marker',
+                                html: '<div style="background: #3388ff; border: 2px solid white; border-radius: 50%; width: 16px; height: 16px;"></div>',
+                                iconSize: [16, 16],
+                                iconAnchor: [8, 8]
+                            })
+                        }).addTo(map).bindPopup('Your Location');
+                        
+                        // Center map on user location
+                        map.setView(userLocation, 15);
+                        
+                        // Fetch restaurants near user location
+                        await fetchRestaurantsNearUser();
+                        
+                        isLocationEnabled = true;
+                        
+                        // Update UI to show results
+                        displayResults(restaurants);
+                        addMarkers(restaurants);
+                    },
+                    function(error) {
+                        console.error('Error getting location:', error);
+                        document.getElementById('results-list').innerHTML = `
+                            <div class="permission-prompt">
+                                <h3>Location Access Denied</h3>
+                                <p>Please enable location services in your browser settings</p>
+                                <button class="permission-btn" onclick="requestUserLocation()">Try Again</button>
+                            </div>
+                        `;
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            } catch (error) {
+                console.error('Error requesting location:', error);
+                document.getElementById('results-list').innerHTML = `
+                    <div class="permission-prompt">
+                        <h3>Error Getting Location</h3>
+                        <p>Something went wrong. Please try again.</p>
+                        <button class="permission-btn" onclick="requestUserLocation()">Try Again</button>
+                    </div>
+                `;
+            }
+        }
+
+        // Function to fetch restaurants using Overpass API
+        async function fetchRestaurantsNearUser() {
+            if (!userLocation) return;
+            
+            const radius = 2000; // 2km radius
+            const lat = userLocation[0];
+            const lng = userLocation[1];
+            
+            // Build Overpass query
+            const overpassQuery = `[out:json][timeout:25];
+                (
+                  node["amenity"="restaurant"](around:${radius},${lat},${lng});
+                  way["amenity"="restaurant"](around:${radius},${lat},${lng});
+                  relation["amenity"="restaurant"](around:${radius},${lat},${lng});
+                  
+                  node["amenity"="fast_food"](around:${radius},${lat},${lng});
+                  way["amenity"="fast_food"](around:${radius},${lat},${lng});
+                  relation["amenity"="fast_food"](around:${radius},${lat},${lng});
+                  
+                  node["amenity"="cafe"](around:${radius},${lat},${lng});
+                  way["amenity"="cafe"](around:${radius},${lat},${lng});
+                  relation["amenity"="cafe"](around:${radius},${lat},${lng});
+                );
+                out center;`;
+            
+            try {
+                // Encode query for URL
+                const encodedQuery = encodeURIComponent(overpassQuery);
+                const response = await fetch(`https://overpass-api.de/api/interpreter?data=${encodedQuery}`);
+                const data = await response.json();
+                
+                // Process the results
+                restaurants = data.elements.map(element => {
+                    // Calculate distance from user
+                    const elementLat = element.center ? element.center.lat : element.lat;
+                    const elementLng = element.center ? element.center.lon : element.lon;
+                    const distance = calculateDistance(lat, lng, elementLat, elementLng);
+                    
+                    // Determine more specific category based on name and tags
+                    const name = element.tags.name || 'Unnamed Restaurant';
+                    const genericCategory = element.tags.amenity || 'restaurant';
+                    const specificCategory = determineSpecificCategory(name, element.tags, genericCategory);
+
+                    return {
+                        id: element.id,
+                        name: name,
+                        category: specificCategory,
+                        lat: elementLat,
+                        lng: elementLng,
+                        address: formatAddress(element.tags),
+                        distance: Math.round(distance * 10) / 10, // Round to 1 decimal place
+                        rating: Math.random() * 1.5 + 3.5 // Random rating between 3.5 and 5.0
+                    };
+                });
+                
+                // Sort by distance
+                restaurants.sort((a, b) => a.distance - b.distance);
+                
+                // Limit to 20 closest restaurants
+                restaurants = restaurants.slice(0, 20);
+                
+            } catch (error) {
+                console.error('Error fetching restaurants:', error);
+                // Fallback to sample data
+                restaurants = generateSampleRestaurants(lat, lng);
+            }
+        }
+
+        // Helper function to calculate distance between two points (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in kilometers
+            const dLat = deg2rad(lat2 - lat1);
+            const dLon = deg2rad(lon2 - lon1);
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * 
+                Math.sin(dLon/2) * Math.sin(dLon/2); 
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+            return R * c; // Distance in kilometers
+        }
+
+        function deg2rad(deg) {
+            return deg * (Math.PI/180);
+        }
+
+        // Helper function to format address from tags
+        function formatAddress(tags) {
+            const parts = [];
+            if (tags['addr:street']) parts.push(tags['addr:street']);
+            if (tags['addr:housenumber']) parts.push(tags['addr:housenumber']);
+            if (tags['addr:city']) parts.push(tags['addr:city']);
+            return parts.join(', ') || 'Address unknown';
+        }
+
+        // Generate sample restaurants around user location (fallback)
+        function generateSampleRestaurants(lat, lng) {
+            const names = [
+                'Bella Italia Pizza', 'Sakura Sushi Bar', 'Green Garden Cafe', 'Burger Palace',
+                'Taco Fiesta', 'Sweet Dreams Bakery', 'Pasta Corner', 'Asian Delight',
+                'Pizza Express', 'Cafe Central', 'Mediterranean Grill', 'Vegetarian Haven',
+                'McDonald\'s', 'Korean BBQ House', 'Indian Spice', 'Thai Orchid',
+                'Organic Salad Bar', 'Mexican Burrito Co', 'Japanese Ramen House', 'French Bistro'
+            ];
+
+            return Array.from({ length: 15 }, (_, i) => {
+                // Generate random offset from user location
+                const latOffset = (Math.random() - 0.5) * 0.01;
+                const lngOffset = (Math.random() - 0.5) * 0.01;
+                const newLat = lat + latOffset;
+                const newLng = lng + lngOffset;
+                const distance = calculateDistance(lat, lng, newLat, newLng);
+
+                // Create mock tags object for sample data
+                const mockTags = { name: names[i % names.length] };
+                
+                return {
+                    id: i,
+                    name: names[i % names.length],
+                    category: determineSpecificCategory(names[i % names.length], mockTags, 'restaurant'),
+                    lat: newLat,
+                    lng: newLng,
+                    address: `${Math.floor(Math.random() * 100) + 1} ${['Main St', 'Oak Ave', 'Pine Rd', 'Elm St', 'Maple Dr'][Math.floor(Math.random() * 5)]}, London`,
+                    distance: Math.round(distance * 10) / 10,
+                    rating: Math.random() * 1.5 + 3.5
+                };
+            }).sort((a, b) => a.distance - b.distance);
+        }
+
+        // Function to determine specific category based on name and tags
+        function determineSpecificCategory(name, tags, genericCategory) {
+            const lowerName = name.toLowerCase();
+            
+            // Check for specific cuisine types in the name
+            if (lowerName.includes('pizza')) return 'pizza';
+            if (lowerName.includes('sushi') || lowerName.includes('sashimi') || lowerName.includes('japanese') || lowerName.includes('ramen')) return 'sushi';
+            if (lowerName.includes('burger') || lowerName.includes('mcdonald') || lowerName.includes('wendys') || lowerName.includes('bk')) return 'burger';
+            if (lowerName.includes('mexican') || lowerName.includes('taco') || lowerName.includes('burrito') || lowerName.includes('quesadilla')) return 'mexican';
+            if (lowerName.includes('asian') || lowerName.includes('thai') || lowerName.includes('chinese') || lowerName.includes('korean') || lowerName.includes('vietnamese') || lowerName.includes('malaysian') || lowerName.includes('indian')) return 'asian';
+            if (lowerName.includes('healthy') || lowerName.includes('salad') || lowerName.includes('juice') || lowerName.includes('smoothie') || lowerName.includes('organic')) return 'healthy';
+            
+            // Check for cuisine types in the cuisine tag
+            if (tags.cuisine) {
+                const cuisines = tags.cuisine.toLowerCase().split(';');
+                for (const cuisine of cuisines) {
+                    if (cuisine.includes('pizza')) return 'pizza';
+                    if (cuisine.includes('sushi') || cuisine.includes('japanese') || cuisine.includes('ramen') || cuisine.includes('sashimi')) return 'sushi';
+                    if (cuisine.includes('burger') || cuisine.includes('american')) return 'burger';
+                    if (cuisine.includes('mexican') || cuisine.includes('taco') || cuisine.includes('burrito')) return 'mexican';
+                    if (cuisine.includes('asian') || cuisine.includes('thai') || cuisine.includes('chinese') || cuisine.includes('korean') || cuisine.includes('vietnamese') || cuisine.includes('malaysian') || cuisine.includes('indian')) return 'asian';
+                    if (cuisine.includes('healthy') || cuisine.includes('salad') || cuisine.includes('organic')) return 'healthy';
+                }
+            }
+            
+            // Return the generic category if no specific match is found
+            return genericCategory;
+        }
+
+        // Function to add markers to map
+        function addMarkers(restaurants) {
+            // Clear existing restaurant markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            markerMap = {}; // Reset the marker map
+
+            restaurants.forEach(restaurant => {
+                const marker = L.marker([restaurant.lat, restaurant.lng], {icon: blueIcon}).addTo(map);
+
+                // Customize popup content
+                const popupContent = `
+                    <div style="font-weight: bold;">${restaurant.name}</div>
+                    <div>${restaurant.address}</div>
+                    <div>Distance: ${restaurant.distance} km</div>
+                    <div>Rating: ${restaurant.rating.toFixed(1)} ⭐</div>
+                    <button class="directions-btn" data-lat="${restaurant.lat}" data-lng="${restaurant.lng}">Get Directions</button>
+                `;
+                marker.bindPopup(popupContent);
+
+                // Add click event to focus on result in sidebar
+                marker.on('click', () => {
+                    highlightResult(restaurant.name);
+                });
+
+                // Add event listener for directions button when popup opens
+                marker.on('popupopen', function() {
+                    // Use event delegation to handle the directions button click
+                    const popupContent = marker.getPopup().getContent();
+                    // Re-bind the content with the event listener
+                    setTimeout(() => {
+                        const directionsBtn = marker.getPopup()._contentNode.querySelector('.directions-btn');
+                        if (directionsBtn) {
+                            directionsBtn.onclick = function() {
+                                const lat = parseFloat(this.getAttribute('data-lat'));
+                                const lng = parseFloat(this.getAttribute('data-lng'));
+                                getDirections(userLocation[0], userLocation[1], lat, lng);
+                            };
+                        }
+                    }, 10);
+                });
+
+                markers.push(marker);
+                markerMap[restaurant.id] = marker; // Store marker reference by restaurant ID
+            });
+        }
+
+        // Function to filter restaurants by category
+        function filterRestaurants(category) {
+            let filteredRestaurants;
+            if (category === 'all') {
+                filteredRestaurants = restaurants;
+            } else {
+                filteredRestaurants = restaurants.filter(r => r.category.includes(category));
+            }
+            
+            // Maintain favorite ordering within the filtered results
+            const favoriteIds = getFavorites();
+            const favoriteRestaurants = filteredRestaurants.filter(r => favoriteIds.includes(r.id.toString()));
+            const regularRestaurants = filteredRestaurants.filter(r => !favoriteIds.includes(r.id.toString()));
+            
+            return [...favoriteRestaurants, ...regularRestaurants];
+        }
+
+        // Function to display results in sidebar
+        function displayResults(restaurants) {
+            const resultsContainer = document.getElementById('results-list');
+            
+            if (restaurants.length === 0) {
+                resultsContainer.innerHTML = '<div class="loading">No restaurants found nearby</div>';
+                return;
+            }
+            
+            // Separate favorites from regular results
+            const favoriteIds = getFavorites();
+            const favoriteRestaurants = restaurants.filter(r => favoriteIds.includes(r.id.toString()));
+            const regularRestaurants = restaurants.filter(r => !favoriteIds.includes(r.id.toString()));
+
+            // Combine favorites first, then regular results
+            const orderedRestaurants = [...favoriteRestaurants, ...regularRestaurants];
+
+            resultsContainer.innerHTML = orderedRestaurants.map(restaurant => {
+                const isFavorite = favoriteIds.includes(restaurant.id.toString());
+                const heartIcon = isFavorite ? 'favorite' : 'favorite_border';
+                const favoriteClass = isFavorite ? 'favorited' : '';
+                return `
+                    <div class="result-item" data-id="${restaurant.id}">
+                        <div class="result-title">${restaurant.name}${isFavorite ? ' ★' : ''}</div>
+                        <div class="result-subtitle">${formatCategoryLabel(restaurant.category)}</div>
+                        <div class="result-details">
+                            <div class="result-rating">
+                                <span class="filled-star">★</span>
+                                <span>${restaurant.rating.toFixed(1)}</span>
+                            </div>
+                            <div class="result-distance">${restaurant.distance} km</div>
+                            <button class="favorite-toggle ${favoriteClass}" data-id="${restaurant.id}">
+                                <span class="material-symbols-rounded">${heartIcon}</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Add click events to result items
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    const restaurant = restaurants.find(r => r.id.toString() === id);
+
+                    if (!restaurant) return;
+
+                    // Clear any existing routes
+                    clearRoute();
+
+                    // Highlight selected item
+                    document.querySelectorAll('.result-item').forEach(i => i.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Change previously selected marker back to blue if it exists
+                    if (currentSelectedMarker) {
+                        currentSelectedMarker.setIcon(blueIcon);
+                    }
+
+                    // Center map on restaurant
+                    map.setView([restaurant.lat, restaurant.lng], 16);
+
+                    // Find and open corresponding marker
+                    const marker = markerMap[restaurant.id]; // Use the markerMap for direct lookup
+
+                    if (marker) {
+                        // Change the selected marker to red
+                        marker.setIcon(redIcon);
+                        currentSelectedMarker = marker; // Update the current selected marker
+                        marker.openPopup();
+                    }
+                });
+            });
+
+            // Add event listeners to favorite toggle buttons
+            document.querySelectorAll('.favorite-toggle').forEach(button => {
+                button.addEventListener('click', function(event) {
+                    event.stopPropagation(); // Prevent triggering the restaurant selection
+                    
+                    const restaurantId = this.getAttribute('data-id');
+                    toggleFavorite(restaurantId);
+                    
+                    // Refresh the display to show updated favorite status
+                    displayResults(restaurants);
+                });
+            });
+        }
+
+        // Helper function to get category label
+        function formatCategoryLabel(category) {
+            const labels = {
+                'restaurant': 'Restaurant • $$',
+                'fast_food': 'Fast Food • $',
+                'cafe': 'Cafe • $',
+                'pizza': 'Pizza • $$',
+                'sushi': 'Sushi • $$$',
+                'asian': 'Asian • $$',
+                'burger': 'Burgers • $',
+                'mexican': 'Mexican • $$',
+                'healthy': 'Healthy • $$'
+            };
+            return labels[category] || category.charAt(0).toUpperCase() + category.slice(1);
+        }
+
+        // Function to highlight result in sidebar
+        function highlightResult(name) {
+            document.querySelectorAll('.result-item').forEach(item => {
+                const restaurantId = item.getAttribute('data-id');
+                const restaurant = restaurants.find(r => r.id.toString() === restaurantId);
+                
+                if (restaurant && restaurant.name === name) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Function to get directions using OSRM with animated route drawing
+        async function getDirections(startLat, startLng, endLat, endLng) {
+            // Check if user location is available
+            if (!userLocation) {
+                alert('Please enable location services first to get directions.');
+                return;
+            }
+            
+            try {
+                // Using OSRM demo server (limited usage)
+                // Format: https://router.project-osrm.org/route/v1/driving/startLon,startLat;endLon,endLat
+                const url = `https://router.project-osrm.org/route/v1/driving/${startLng},${startLat};${endLng},${endLat}?overview=full&geometries=geojson`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.code !== 'Ok') {
+                    throw new Error(data.message || 'Could not find route');
+                }
+
+                const route = data.routes[0];
+                const coordinates = route.geometry.coordinates;
+                
+                // Convert coordinates to Leaflet LatLng objects
+                const latLngs = coordinates.map(coord => [coord[1], coord[0]]);
+                
+                // Create a dashed polyline that will be animated to solid
+                const routeLine = L.polyline(latLngs, {
+                    color: '#3388ff',
+                    weight: 6,
+                    opacity: 0.7,
+                    dashArray: '10, 10' // Create dashed line initially
+                }).addTo(map);
+                
+                // Fit the map to show the entire route
+                map.fitBounds(routeLine.getBounds());
+                
+                // Store route reference to allow clearing later
+                window.currentRoute = routeLine;
+                
+                // Animate the route drawing
+                animateRouteDrawing(routeLine);
+                
+                console.log(`Route calculated: ${route.distance / 1000} km, ${Math.round(route.duration / 60)} mins`);
+            } catch (error) {
+                console.error('Error getting directions:', error);
+                alert('Could not get directions. Please try again later.');
+            }
+        }
+        
+        // Function to animate the route drawing
+        function animateRouteDrawing(routeLine) {
+            // Gradually change the dash array to make it look like the line is being drawn
+            let dashOffset = 20;
+            const animationInterval = setInterval(() => {
+                dashOffset -= 0.5;
+                routeLine.setStyle({
+                    dashArray: `0, ${dashOffset}`,
+                    weight: 6
+                });
+                
+                if (dashOffset <= 0) {
+                    clearInterval(animationInterval);
+                    // Once animation is complete, make it a solid line
+                    routeLine.setStyle({
+                        dashArray: null, // Remove dash effect
+                        weight: 6
+                    });
+                }
+            }, 30); // Update every 30ms for smooth animation
+        }
+
+        // Function to clear the current route
+        function clearRoute() {
+            if (window.currentRoute) {
+                map.removeLayer(window.currentRoute);
+                window.currentRoute = null;
+            }
+        }
+
+        // Function to get favorites from localStorage
+        function getFavorites() {
+            const favorites = localStorage.getItem('favoriteRestaurants');
+            return favorites ? JSON.parse(favorites) : [];
+        }
+
+        // Function to check if a restaurant is favorited by ID
+        function isRestaurantFavorited(restaurantId) {
+            const favorites = getFavorites();
+            return favorites.includes(restaurantId);
+        }
+
+        // Function to save favorites to localStorage
+        function saveFavorites(favorites) {
+            localStorage.setItem('favoriteRestaurants', JSON.stringify(favorites));
+        }
+
+        // Function to toggle favorite status of a restaurant
+        function toggleFavorite(restaurantId) {
+            let favorites = getFavorites();
+            const index = favorites.indexOf(restaurantId);
+            
+            if (index === -1) {
+                // Add to favorites
+                favorites.push(restaurantId);
+            } else {
+                // Remove from favorites
+                favorites.splice(index, 1);
+            }
+            
+            saveFavorites(favorites);
+        }
+
+        // Event listeners for category chips
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', function() {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+
+                currentCategory = this.getAttribute('data-category');
+
+                if (isLocationEnabled) {
+                    const filteredRestaurants = filterRestaurants(currentCategory);
+                    displayResults(filteredRestaurants);
+                    addMarkers(filteredRestaurants);
+                }
+            });
+        });
+
+        // Search functionality
+        document.getElementById('search-input').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+
+            if (searchTerm.trim() === '') {
+                const filteredRestaurants = filterRestaurants(currentCategory);
+                displayResults(filteredRestaurants);
+                return;
+            }
+
+            const filteredRestaurants = restaurants.filter(restaurant =>
+                restaurant.name.toLowerCase().includes(searchTerm) ||
+                formatCategoryLabel(restaurant.category).toLowerCase().includes(searchTerm) ||
+                restaurant.address.toLowerCase().includes(searchTerm)
+            );
+
+            displayResults(filteredRestaurants);
+            addMarkers(filteredRestaurants);
+        });
+
+        // Request location button
+        document.getElementById('request-location').addEventListener('click', requestUserLocation);
+
+        // Locate button functionality
+        document.getElementById('locate-btn').addEventListener('click', requestUserLocation);
+
+
+        // Initial check for geolocation support
+        if (!navigator.geolocation) {
+            document.getElementById('results-list').innerHTML = `
+                <div class="permission-prompt">
+                    <h3>Geolocation Not Supported</h3>
+                    <p>Your browser does not support location services</p>
+                </div>
+            `;
+        }
+        
+        // Mobile device detection and UI adjustments
+        function isMobileDevice() {
+            return window.innerWidth <= 768 || 
+                   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+        
+        // Apply mobile-specific adjustments
+        function applyMobileAdjustments() {
+            if (isMobileDevice()) {
+                // Add mobile-specific class to body for additional styling
+                document.body.classList.add('mobile-device');
+                
+                // Adjust map height to be more appropriate for mobile
+                const mapElement = document.getElementById('map');
+                if (mapElement) {
+                    mapElement.style.height = '100%';
+                }
+                
+                // Make sure the search input is usable on mobile
+                const searchInput = document.getElementById('search-input');
+                if (searchInput) {
+                    searchInput.setAttribute('autocorrect', 'off');
+                    searchInput.setAttribute('autocapitalize', 'off');
+                    searchInput.setAttribute('spellcheck', 'false');
+                }
+                
+                // Adjust category chips to be more touch-friendly
+                const chips = document.querySelectorAll('.chip');
+                chips.forEach(chip => {
+                    // Ensure minimum touch target size
+                    chip.style.minHeight = '44px'; // Minimum recommended touch target size
+                });
+                
+                // Adjust FAB for better thumb accessibility (bottom corner)
+                const fab = document.querySelector('.fab');
+                if (fab) {
+                    fab.style.bottom = '20px';
+                    fab.style.right = '20px';
+                    fab.style.width = '56px';
+                    fab.style.height = '56px';
+                }
+            }
+        }
+        
+        // Run mobile adjustments on load and on resize
+        document.addEventListener('DOMContentLoaded', applyMobileAdjustments);
+        window.addEventListener('resize', applyMobileAdjustments);
+        
+        // Also trigger when orientation changes (important for mobile)
+        window.addEventListener('orientationchange', function() {
+            setTimeout(applyMobileAdjustments, 100); // Delay to allow orientation change to complete
+        });
+    </script>
+</body>
+</html>
